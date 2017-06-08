@@ -5,7 +5,8 @@
 var webpage = require("webpage");
 var system = require("system");
 
-var HTML_PREFIX = "<!DOCTYPE html><style>html, body { margin: 0; padding: 0; } " + "svg { position: absolute; top: 0; left: 0; }</style>";
+var HTML_PREFIX = "<!DOCTYPE html><style>html, body { margin: 0; padding: 0; } " +
+                  "svg { position: absolute; top: 0; left: 0; }</style>";
 
 if (system.args.length !== 2) {
     console.error("Usage: converter.js options");
@@ -45,7 +46,8 @@ function convert(options) {
 
             var dimensions = getSVGDimensions(page);
             if (!dimensions) {
-                console.error("Width or height could not be determined from either the source file or the supplied " + "dimensions");
+                console.error("Width or height could not be determined from either the source file or the supplied " +
+                              "dimensions");
                 phantom.exit();
                 return;
             }

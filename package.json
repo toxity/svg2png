@@ -13,6 +13,7 @@
   ],
   "scripts": {
     "test": "mocha",
+    "build": "$(npm bin)/babel src -d lib --presets babel-preset-es2015",
     "rebaseline": "node test/success-tests/rebaseline.js",
     "lint": "eslint lib test"
   },
@@ -23,6 +24,9 @@
     "yargs": "^6.5.0"
   },
   "devDependencies": {
+    "babel-cli": "^6.24.1",
+    "babel-core": "^6.24.1",
+    "babel-preset-es2015": "^6.24.1",
     "chai": "^3.5.0",
     "chai-as-promised": "^6.0.0",
     "eslint": "^3.12.2",

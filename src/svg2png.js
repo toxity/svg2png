@@ -1,18 +1,16 @@
 "use strict";
+const path = require("path");
+const fileURL = require("file-url");
+const childProcess = require("pn/child_process");
 
-var path = require("path");
-var fileURL = require("file-url");
-var childProcess = require("pn/child_process");
+const phantomjsCmd = require("phantomjs-prebuilt").path;
+const converterFileName = path.resolve(__dirname, "./converter.js");
 
-var phantomjsCmd = require("phantomjs-prebuilt").path;
-var converterFileName = path.resolve(__dirname, "./converter.js");
+const PREFIX = "data:image/png;base64,";
 
-var PREFIX = "data:image/png;base64,";
-
-module.exports = function (sourceBuffer, options) {
-    return Promise.resolve().then(function () {
-        // catch thrown errors
-        var cp = childProcess.execFile(phantomjsCmd, getPhantomJSArgs(options), { maxBuffer: Infinity });
+module.exports = (sourceBuffer, options) => {
+    return Promise.resolve().then(() => { // catch thrown errors
+        const cp = childProcess.execFile(phantomjsCmd, getPhantomJSArgs(options), { maxBuffer: Infinity });
 
         writeBufferInChunks(cp.stdin, sourceBuffer);
 
@@ -20,16 +18,14 @@ module.exports = function (sourceBuffer, options) {
     });
 };
 
-module.exports.sync = function (sourceBuffer, options) {
-    var result = childProcess.spawnSync(phantomjsCmd, getPhantomJSArgs(options), {
+module.exports.sync = (sourceBuffer, options) => {
+    const result = childProcess.spawnSync(phantomjsCmd, getPhantomJSArgs(options), {
         input: sourceBuffer.toString("utf8")
     });
     return processResult(result);
 };
 
-function getPhantomJSArgs() {
-    var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
+function getPhantomJSArgs(options = {}) {
     if (options.filename !== undefined && options.url !== undefined) {
         throw new Error("Cannot specify both filename and url options");
     }
@@ -40,23 +36,26 @@ function getPhantomJSArgs() {
         delete options.filename;
     }
 
-    return [converterFileName, JSON.stringify(options)];
+    return [
+        converterFileName,
+        JSON.stringify(options)
+    ];
 }
 
 function writeBufferInChunks(writableStream, buffer) {
-    var asString = buffer.toString("utf8");
+    const asString = buffer.toString("utf8");
 
-    var INCREMENT = 1024;
+    const INCREMENT = 1024;
 
     writableStream.cork();
-    for (var offset = 0; offset < asString.length; offset += INCREMENT) {
+    for (let offset = 0; offset < asString.length; offset += INCREMENT) {
         writableStream.write(asString.substring(offset, offset + INCREMENT));
     }
     writableStream.end();
 }
 
 function processResult(result) {
-    var stdout = result.stdout.toString();
+    const stdout = result.stdout.toString();
     if (stdout.startsWith(PREFIX)) {
         return new Buffer(stdout.substring(PREFIX.length), "base64");
     }
@@ -66,7 +65,7 @@ function processResult(result) {
         throw new Error(stdout.replace(/\r/g, "").trim());
     }
 
-    var stderr = result.stderr.toString();
+    const stderr = result.stderr.toString();
     if (stderr.length > 0) {
         // But hey something else might get to stderr.
         throw new Error(stderr.replace(/\r/g, "").trim());
